@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="LinkPulse Web — Analysez les backlinks de n'importe quel domaine : Domain Rating, domaines référents, profil dofollow/nofollow et top 100 backlinks." />
+  <title>LinkPulse Web — Free Backlink Checker</title>
+
+  <!-- Inter Font (Google Fonts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Main Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+
+  <!-- ═══════════════════════════ HEADER ═══════════════════════════════════ -->
+  <header class="lp-header" role="banner">
+    <div class="lp-header-container">
+
+      <!-- Brand -->
+      <a href="/" class="lp-brand" aria-label="LinkPulse Web Accueil">
+        <div class="lp-brand-logo" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+          </svg>
+        </div>
+        LinkPulse
+        <span class="lp-brand-badge">Web</span>
+      </a>
+
+      <!-- Nav Actions -->
+      <nav class="lp-nav-actions" aria-label="Actions principales">
+        <button id="lp-btn-history" class="lp-btn-icon-text" aria-label="Historique des analyses">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Historique
+          <span id="lp-history-count" style="background:#eff4ff;color:#195afe;border-radius:999px;font-size:0.72rem;font-weight:700;padding:1px 7px;">0</span>
+        </button>
+
+        <button class="lp-btn-primary" onclick="document.getElementById('lp-search-input').focus(); document.getElementById('lp-search-input').scrollIntoView({behavior:'smooth'});" aria-label="Lancer une analyse">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+          </svg>
+          Analyser un domaine
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════ HERO + SEARCH ═════════════════════════════ -->
+  <section class="lp-hero" aria-labelledby="hero-title">
+    <div class="lp-hero-inner">
+
+      <!-- Tag line -->
+      <div class="lp-hero-tag" aria-hidden="true">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Outil gratuit · 100% navigateur · IndexedDB
+      </div>
+
+      <h1 id="hero-title" class="lp-hero-title">Free Backlink Checker</h1>
+      <p class="lp-hero-desc">
+        Analysez le profil de backlinks de n'importe quel site — Domain Rating, domaines référents,
+        ratio dofollow/nofollow et top 100 liens entrants.
+      </p>
+
+      <!-- Search Form -->
+      <form class="lp-search-box" role="search" onsubmit="return false;">
+        <div class="lp-input-wrapper">
+          <span class="lp-input-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+            </svg>
+          </span>
+          <input
+            id="lp-search-input"
+            type="url"
+            class="lp-search-input"
+            placeholder="ex: stripe.com ou https://github.com/vercel"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            aria-label="URL ou domaine à analyser"
+          />
+        </div>
+
+        <div class="lp-scope-select-wrap">
+          <select id="lp-scope-select" class="lp-scope-select" aria-label="Portée de l'analyse">
+            <option value="domain">Domain</option>
+            <option value="subdomains">Subdomains</option>
+            <option value="exact">Exact URL</option>
+          </select>
+          <span class="lp-scope-arrow" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </span>
+        </div>
+
+        <button id="lp-search-btn" type="submit" class="lp-btn-primary lp-search-btn">
+          <span id="lp-search-spinner" class="lp-spinner" aria-hidden="true"></span>
+          <span id="lp-search-label">Analyser</span>
+        </button>
+      </form>
+
+      <!-- Error Alert -->
+      <div id="lp-alert" class="lp-alert lp-alert-error" role="alert" aria-live="polite">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="lp-alert-msg"></span>
+      </div>
+
+      <!-- Quick Picks -->
+      <div class="lp-quick-picks" aria-label="Exemples rapides">
+        <span>Essayez :</span>
+        <span class="lp-quick-chip" data-url="stripe.com" role="button" tabindex="0">stripe.com</span>
+        <span class="lp-quick-chip" data-url="github.com" role="button" tabindex="0">github.com</span>
+        <span class="lp-quick-chip" data-url="openai.com" role="button" tabindex="0">openai.com</span>
+        <span class="lp-quick-chip" data-url="lemonde.fr" role="button" tabindex="0">lemonde.fr</span>
+        <span class="lp-quick-chip" data-url="vercel.com" role="button" tabindex="0">vercel.com</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ MAIN CONTENT ══════════════════════════════ -->
+  <main class="lp-main" role="main">
+
+    <!-- Initial / Welcome State -->
+    <div id="lp-initial-state" style="text-align:center; padding: 48px 24px 32px;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:#f1f5f9;border-radius:50%;margin-bottom:20px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
+          <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+      <h2 style="font-size:1.3rem;font-weight:700;color:#334155;margin-bottom:8px;">Prêt à analyser</h2>
+      <p style="font-size:0.95rem;color:#64748b;max-width:460px;margin:0 auto 24px;">
+        Entrez l'URL ou le domaine de votre choix ci-dessus et obtenez instantanément son profil complet de backlinks.
+      </p>
+
+      <!-- Feature pills -->
+      <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+        <span style="background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:5px 14px;font-size:0.82rem;font-weight:500;color:#475569;display:inline-flex;align-items:center;gap:6px;">
+          <span style="color:#195afe">●</span> Domain Rating
+        </span>
+        <span style="background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:5px 14px;font-size:0.82rem;font-weight:500;color:#475569;display:inline-flex;align-items:center;gap:6px;">
+          <span style="color:#10b981">●</span> Top 100 backlinks
+        </span>
+        <span style="background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:5px 14px;font-size:0.82rem;font-weight:500;color:#475569;display:inline-flex;align-items:center;gap:6px;">
+          <span style="color:#f59e0b">●</span> Filtres Dofollow / Nofollow
+        </span>
+        <span style="background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:5px 14px;font-size:0.82rem;font-weight:500;color:#475569;display:inline-flex;align-items:center;gap:6px;">
+          <span style="color:#8b5cf6">●</span> Export CSV
+        </span>
+        <span style="background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:5px 14px;font-size:0.82rem;font-weight:500;color:#475569;display:inline-flex;align-items:center;gap:6px;">
+          <span style="color:#ec4899">●</span> Historique persistant (IndexedDB)
+        </span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ RESULTS SECTION ═══════════════════════════ -->
+    <section id="lp-results-section" aria-label="Résultats de l'analyse" style="display:none;">
+
+      <!-- Target Banner -->
+      <div class="lp-target-banner" aria-live="polite">
+        <div class="lp-target-meta">
+          <div class="lp-target-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+            </svg>
+            <span id="lp-banner-domain">—</span>
+          </div>
+          <span id="lp-banner-scope" class="lp-scope-badge">Domain</span>
+          <span id="lp-banner-time" class="lp-target-time"></span>
+        </div>
+        <div class="lp-target-actions">
+          <button id="lp-btn-export" class="lp-btn-icon-text" aria-label="Exporter en CSV">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Metrics Cards -->
+      <div class="lp-metrics-grid" role="region" aria-label="Métriques clés">
+
+        <!-- Domain Rating -->
+        <article class="lp-metric-card">
+          <div class="lp-metric-header">
+            <div class="lp-metric-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Domain Rating (DR)
+              <span class="lp-metric-tooltip-trigger" title="Score de 0 à 100 mesurant l'autorité du profil de backlinks.">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div class="lp-metric-value-row">
+            <span id="lp-metric-dr" class="lp-metric-value">—</span>
+            <span class="lp-metric-trend">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+              Score autorité
+            </span>
+          </div>
+          <div class="lp-gauge-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+            <div class="lp-gauge-track">
+              <div id="lp-dr-gauge-fill" class="lp-gauge-fill"></div>
+            </div>
+            <div class="lp-gauge-labels"><span>0</span><span>50</span><span>100</span></div>
+          </div>
+        </article>
+
+        <!-- Total Backlinks -->
+        <article class="lp-metric-card">
+          <div class="lp-metric-header">
+            <div class="lp-metric-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M15 7h3a5 5 0 010 10h-3m-6 0H6A5 5 0 016 7h3"/><line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+              Backlinks
+              <span class="lp-metric-tooltip-trigger" title="Nombre total de backlinks pointant vers ce domaine.">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div class="lp-metric-value-row">
+            <span id="lp-metric-backlinks" class="lp-metric-value">—</span>
+          </div>
+          <div class="lp-metric-subtitle">Liens entrants détectés (index global)</div>
+        </article>
+
+        <!-- Referring Domains -->
+        <article class="lp-metric-card">
+          <div class="lp-metric-header">
+            <div class="lp-metric-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="2" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/>
+                <rect x="9" y="17" width="6" height="6"/><path d="M5 9v4c0 1 .9 2 2 2h10c1.1 0 2-1 2-2V9"/>
+                <line x1="12" y1="15" x2="12" y2="17"/>
+              </svg>
+              Domaines référents
+              <span class="lp-metric-tooltip-trigger" title="Nombre de domaines uniques hébergeant au moins un backlink.">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div class="lp-metric-value-row">
+            <span id="lp-metric-ref-domains" class="lp-metric-value">—</span>
+          </div>
+          <div class="lp-metric-subtitle">Domaines uniques référençants</div>
+        </article>
+
+        <!-- Dofollow % -->
+        <article class="lp-metric-card">
+          <div class="lp-metric-header">
+            <div class="lp-metric-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              Liens Dofollow
+              <span class="lp-metric-tooltip-trigger" title="Part (en %) des backlinks transmettant de l'autorité SEO.">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <div class="lp-metric-value-row">
+            <span id="lp-metric-dofollow" class="lp-metric-value">—</span>
+          </div>
+          <div class="lp-metric-subtitle">Des backlinks transmettent du jus SEO</div>
+        </article>
+
+      </div><!-- /metrics-grid -->
+
+      <!-- Filter Toolbar -->
+      <div class="lp-toolbar-card" role="toolbar" aria-label="Filtres backlinks">
+
+        <div class="lp-toolbar-primary-row">
+
+          <!-- Type Filter Segments -->
+          <div class="lp-segment-control" role="group" aria-label="Filtrer par type de lien">
+            <button id="seg-all" class="lp-segment-btn active" aria-pressed="true">
+              Tous
+              <span id="badge-all" class="lp-segment-badge">0</span>
+            </button>
+            <button id="seg-dofollow" class="lp-segment-btn" aria-pressed="false">
+              Dofollow
+              <span id="badge-dofollow" class="lp-segment-badge">0</span>
+            </button>
+            <button id="seg-nofollow" class="lp-segment-btn" aria-pressed="false">
+              Nofollow
+              <span id="badge-nofollow" class="lp-segment-badge">0</span>
+            </button>
+          </div>
+
+          <!-- Anchor Text Search -->
+          <div class="lp-search-anchor-wrapper">
+            <svg class="lp-anchor-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            <input
+              id="lp-anchor-search"
+              type="search"
+              class="lp-search-anchor-input"
+              placeholder="Filtrer par ancre, domaine ou titre…"
+              aria-label="Recherche par ancre ou domaine"
+            />
+            <button id="lp-anchor-clear" class="lp-anchor-clear-btn" aria-label="Effacer la recherche">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Frequent Anchors Row -->
+        <div class="lp-frequent-anchors-row" aria-label="Ancres les plus fréquentes">
+          <span class="lp-frequent-anchors-title">Ancres fréquentes :</span>
+          <div id="lp-anchor-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+        </div>
+
+      </div><!-- /toolbar -->
+
+      <!-- Backlinks Table -->
+      <div class="lp-table-card" role="region" aria-label="Tableau des backlinks">
+
+        <div class="lp-table-header-meta">
+          <span id="lp-results-count" class="lp-results-count">100 résultats</span>
+          <span style="font-size:0.8rem;color:var(--color-text-muted);">Top 100 backlinks · Triable par DR ou Trafic</span>
+        </div>
+
+        <div class="lp-table-scroll">
+          <table class="lp-table" aria-label="Liste des backlinks">
+            <thead>
+              <tr>
+                <th style="min-width:280px;">Page référente</th>
+                <th style="min-width:260px;">Ancre & contexte</th>
+                <th style="min-width:180px;">URL cible</th>
+                <th style="min-width:100px;">Type</th>
+                <th class="text-right sortable" data-sort="sourceDr" style="min-width:80px;" aria-sort="descending">
+                  DR source <span class="lp-sort-indicator">↓</span>
+                </th>
+                <th class="text-right sortable" data-sort="traffic" style="min-width:100px;" aria-sort="none">
+                  Trafic / mois <span class="lp-sort-indicator">↕</span>
+                </th>
+                <th class="text-right" style="min-width:100px;">Vu le</th>
+              </tr>
+            </thead>
+            <tbody id="lp-table-body">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div id="lp-pagination" class="lp-pagination-bar" role="navigation" aria-label="Pagination">
+          <!-- Injected by JS -->
+        </div>
+
+      </div><!-- /table-card -->
+
+      <!-- Upgrade CTA Banner -->
+      <div class="lp-upgrade-banner" role="complementary" aria-label="Offre premium">
+        <div class="lp-upgrade-content">
+          <div class="lp-upgrade-tag">🚀 LinkPulse Pro</div>
+          <h2 class="lp-upgrade-title">Débloquez l'analyse complète de vos backlinks</h2>
+          <p class="lp-upgrade-desc">
+            Accédez à l'intégralité du profil de backlinks, aux alertes de liens perdus/gagnés,
+            aux rapports hebdomadaires automatiques et aux comparaisons multi-domaines avec
+            LinkPulse Pro — l'outil pour les équipes SEO ambitieuses.
+          </p>
+        </div>
+        <button class="lp-upgrade-btn" onclick="alert('Bientôt disponible ! Revenez prochainement.')">
+          Essayer Pro gratuitement →
+        </button>
+      </div>
+
+    </section><!-- /results-section -->
+
+  </main>
+
+  <!-- ═══════════════════════════ HISTORY DRAWER ═══════════════════════════ -->
+  <div id="lp-drawer-backdrop" class="lp-drawer-backdrop" aria-hidden="true"></div>
+
+  <aside id="lp-drawer" class="lp-drawer" role="complementary" aria-label="Historique des analyses">
+    <div class="lp-drawer-header">
+      <div class="lp-drawer-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Historique des analyses
+      </div>
+      <button id="lp-drawer-close" class="lp-drawer-close" aria-label="Fermer l'historique">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="lp-history-list" class="lp-drawer-body" role="list" aria-label="Domaines récemment analysés">
+      <!-- Injected by JS -->
+    </div>
+
+    <div class="lp-drawer-footer">
+      <span style="font-size:0.8rem;color:var(--color-text-muted);">Stocké en IndexedDB (local)</span>
+      <button id="lp-history-clear" class="lp-btn-icon-text" style="font-size:0.82rem;color:var(--color-error);border-color:transparent;" aria-label="Vider l'historique">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/>
+          <path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/>
+        </svg>
+        Vider l'historique
+      </button>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════ TOAST ════════════════════════════════════ -->
+  <div id="lp-toast" class="lp-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ═══════════════════════════ FOOTER ═══════════════════════════════════ -->
+  <footer class="lp-footer" role="contentinfo">
+    <div class="lp-footer-container">
+      <span>
+        © 2026 <strong>LinkPulse Web</strong> — Outil de démonstration. Les données sont générées
+        de façon déterministe à partir du nom de domaine et stockées localement via IndexedDB.
+      </span>
+      <span style="display:flex;align-items:center;gap:16px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+          </svg>
+          Données 100% locales
+        </span>
+        <span style="display:inline-flex;align-items:center;gap:5px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+          Vanilla JS · IndexedDB · CSS3
+        </span>
+      </span>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════ SCRIPTS ══════════════════════════════════ -->
+  <script src="js/db.js"></script>
+  <script src="js/data-generator.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
